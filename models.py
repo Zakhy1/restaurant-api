@@ -24,6 +24,7 @@ class Submenu(Base):
     description = mapped_column(String)
     menu_id = mapped_column(Integer, ForeignKey("menu.id"))
     menu = relationship("Menu", backref="submenu")
+    dishes = relationship("Dish", back_populates="submenu", cascade="all, delete")
 
 
 class Dish(Base):
