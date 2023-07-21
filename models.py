@@ -15,7 +15,7 @@ class Menu(Base):
     __tablename__ = "menus"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(128))
+    title: Mapped[str] = mapped_column(String(128), unique=True)
     description: Mapped[str] = mapped_column(String(128))
 
     submenus: Mapped[List["SubMenu"]] = relationship(
@@ -33,7 +33,7 @@ class SubMenu(Base):
     __tablename__ = "submenus"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(128))
+    title: Mapped[str] = mapped_column(String(128), unique=True)
     description: Mapped[str] = mapped_column(String(128))
 
     menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id"))
@@ -54,7 +54,7 @@ class Dish(Base):
     __tablename__ = "dishes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(128))
+    title: Mapped[str] = mapped_column(String(128), unique=True)
     description: Mapped[str] = mapped_column(String(128))
     price: Mapped[float] = mapped_column(Float())
 

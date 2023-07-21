@@ -1,4 +1,7 @@
+from sqlalchemy.orm import Session
+
 from database import db_session
+from database import engine
 from models import Menu
 from menu.schema import Menu as MenuSchema
 from sqlalchemy import select
@@ -14,15 +17,16 @@ def get_menu(menu_id):
     return menu
 
 
-def add_menu_item(menu: MenuSchema):
-    query = select(Menu).where(Menu.title == menu.title)
-    result = db_session.execute(query)
-    if result.one():
-        return {"error": f"menu with name '{menu.title}' exist"}
-    new_menu = Menu(title=menu.title, description=menu.description)
-    db_session.add(new_menu)
-    db_session.commit()
-    return new_menu
+def add_menu_item(menu: MenuSchema): # TODO TEST
+    with Session(engine) as session:
+        query = select(Menu).where(Menu.title == menu.title)
+        result = session.execute(query).scalar_one_or_none()
+        if result:
+            return {"error": f"menu with name '{menu.title}' exist"}
+        new_menu = Menu(title=menu.title, description=menu.description)
+        session.add(new_menu)
+        session.commit()
+        return new_menu
 
 
 def edit_menu_item(menu_id: int, menu_item: MenuSchema):
