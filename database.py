@@ -23,4 +23,3 @@ engine = create_engine(
 )
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db_session = Session()
-Base = declarative_base()
