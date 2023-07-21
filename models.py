@@ -13,10 +13,10 @@ class Menu(Base):
     id = mapped_column(Integer, primary_key=True, index=True)
     title = mapped_column(String)
     description = mapped_column(String)
-    submenus: Mapped[List["Submenu"]] = relationship(back_populates="menu", cascade="all, delete")
+    submenus: Mapped[List["SubMenu"]] = relationship(back_populates="menu", cascade="all, delete")
 
 
-class Submenu(Base):
+class SubMenu(Base):
     __tablename__ = "submenu"
 
     id = mapped_column(Integer, primary_key=True, index=True)

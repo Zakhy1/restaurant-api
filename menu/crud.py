@@ -18,7 +18,7 @@ def add_menu_item(menu: MenuSchema):
     query = select(Menu).where(Menu.title == menu.title)
     result = db_session.execute(query)
     if result.one():
-        return {"error": f"menu with name {menu.title} exist"}
+        return {"error": f"menu with name '{menu.title}' exist"}
     new_menu = Menu(title=menu.title, description=menu.description)
     db_session.add(new_menu)
     db_session.commit()
