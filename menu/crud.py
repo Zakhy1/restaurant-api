@@ -1,47 +1,52 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from database import db_session
-from database import engine
-from models import Menu
 from menu.schema import Menu as MenuSchema
-from sqlalchemy import select
+from models import Menu
 
 
-def get_menus():
-    menus = db_session.query(Menu).all()
-    return menus
+class MenuOperations:
+    def __init__(self, engine):
+        self.engine = engine
 
+    def get_menus(self):
+        with Session(self.engine) as session:
+            menus = session.query(Menu).all()
+            return menus
 
-def get_menu(menu_id):
-    menu = db_session.get(Menu, menu_id)
-    return menu
+    def get_menu(self, menu_id: int):
+        with Session(self.engine) as session:
+            menu = session.get(Menu, menu_id)
+            return menu
 
+    def add_menu_item(self, menu: MenuSchema):  # TODO TEST
+        with Session(self.engine) as session:
+            query = select(Menu).where(Menu.title == menu.title)
+            result = session.execute(query).scalar_one_or_none()
+            if result:
+                return {"error": f"menu with name '{menu.title}' exist"}
+            new_menu = Menu(title=menu.title, description=menu.description)
+            session.add(new_menu)
+            query = select(Menu).where(Menu.title == menu.title)  # todo refactor with 2 queries
+            result = session.execute(query)
+            session.commit()
+            # session.refresh()
+            return result.scalar_one_or_none()
 
-def add_menu_item(menu: MenuSchema): # TODO TEST
-    with Session(engine) as session:
-        query = select(Menu).where(Menu.title == menu.title)
-        result = session.execute(query).scalar_one_or_none()
-        if result:
-            return {"error": f"menu with name '{menu.title}' exist"}
-        new_menu = Menu(title=menu.title, description=menu.description)
-        session.add(new_menu)
-        session.commit()
-        return new_menu
+    def edit_menu_item(self, menu_id: int, menu_item: MenuSchema):
+        with Session(self.engine) as session:
+            to_edit = session.get(Menu, menu_id)
+            if to_edit:
+                to_edit.title = menu_item.title
+                to_edit.description = menu_item.description
+                session.commit()
+                return {"id": to_edit.id, "title": to_edit.title, "description": to_edit.description}
+            else:
+                return {"error": f"menu with id {menu_id} not found"}
 
-
-def edit_menu_item(menu_id: int, menu_item: MenuSchema):
-    to_edit = db_session.get(Menu, menu_id)
-    if to_edit:
-        to_edit.title = menu_item.title
-        to_edit.description = menu_item.description
-        db_session.commit()
-        return {"id": to_edit.id, "title": to_edit.title, "description": to_edit.description}
-    else:
-        return {"error": f"menu with id {menu_id} not found"}
-
-
-def delete_menu_item(menu_id: int):
-    to_delete = db_session.get(Menu, menu_id)
-    db_session.delete(to_delete)
-    db_session.commit()
-    return to_delete
+    def delete_menu_item(self, menu_id: int):
+        with Session(self.engine) as session:
+            to_delete = session.get(Menu, menu_id)
+            session.delete(to_delete)
+            session.commit()
+            return to_delete
