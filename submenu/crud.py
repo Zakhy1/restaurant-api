@@ -1,24 +1,54 @@
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from database import db_session
 from models import SubMenu
+from submenu.schema import SubMenu as SubMenuSchema
 
 
-def get_submenus(menu_id: int):  # TODO DONE with data and special conditions
-    query = select(SubMenu).where(SubMenu.menu_id == menu_id)
-    res = db_session.execute(query)
-    for i in res:
-        print(i)
+class SubMenuOperations:
+    def __init__(self, engine):
+        self.engine = engine
 
+    def get_submenus(self, menu_id: int):
+        with Session(self.engine) as session:
+            query = select(SubMenu).where(SubMenu.menu_id == menu_id)
+            submenus = session.execute(query)
+            return submenus.fetchall()
 
-def get_submenu(menu_id: int, submenu_id: int):  # TODO
-    query = select(SubMenu).where(SubMenu.menu_id == menu_id and SubMenu.menu_id == submenu_id)
-    res = db_session.execute(query)
+    def get_submenu(self, menu_id: int, submenu_id: int):  # TODO
+        with Session(self.engine) as session:
+            query = select(SubMenu).where(SubMenu.menu_id == menu_id and SubMenu.menu_id == submenu_id)
+            res = session.execute(query)
+            return res.scalar_one_or_none()
 
+    def add_submenu(self, menu_id: int, submenu: SubMenuSchema):
+        with Session(self.engine) as session:
+            query = select(SubMenu).where(SubMenu.title == submenu.title)
+            result = session.execute(query)
+            if result.scalar_one_or_none():
+                return {"error": f"submenu with name '{submenu.title}' already exist"}
+            new_submenu = SubMenu(
+                title=submenu.title, description=submenu.description, menu_id=menu_id)
+            session.add(new_submenu)
+            query = select(SubMenu).where(SubMenu.title == submenu.title)  # todo refactor with 2 queries
+            result = session.execute(query)
+            session.commit()
+            return result.scalar_one_or_none()
 
-def add_submenu(menu_id, submenu: SubMenu):
-    query = select(SubMenu).where(SubMenu.title == SubMenu.title)
-    result = db_session.execute(query)
-    if result.one():
-        return {"error": f"submenu with name '{submenu.title}' exist"}
-    new_submenu = SubMenu(title=submenu.title, description=submenu.description, menu_id=submenu.menu_id)
+    def edit_submenu(self, menu_id, submenu_id, submenu: SubMenuSchema):
+        with Session(self.engine) as session:
+            to_edit = session.get(SubMenu, submenu_id)
+            if to_edit:
+                to_edit.title = submenu.title
+                to_edit.description = submenu.description
+                session.commit()
+                return {"id": to_edit.id, "title": to_edit.title, "description": to_edit.description}
+            else:
+                return {"error": f"menu with id {menu_id} not found"}
+
+    def delete_menu_item(self, menu_id: int, submenu_id: int):
+        with Session(self.engine) as session:
+            to_delete = session.get(SubMenu, submenu_id)
+            session.delete(to_delete)
+            session.commit()
+            return to_delete

@@ -19,12 +19,12 @@ class MenuOperations:
             menu = session.get(Menu, menu_id)
             return menu
 
-    def add_menu_item(self, menu: MenuSchema):  # TODO TEST
+    def add_menu(self, menu: MenuSchema):  # TODO TEST
         with Session(self.engine) as session:
             query = select(Menu).where(Menu.title == menu.title)
             result = session.execute(query).scalar_one_or_none()
             if result:
-                return {"error": f"menu with name '{menu.title}' exist"}
+                return {"error": f"menu with name '{menu.title}' already exist"}
             new_menu = Menu(title=menu.title, description=menu.description)
             session.add(new_menu)
             query = select(Menu).where(Menu.title == menu.title)  # todo refactor with 2 queries
@@ -33,7 +33,7 @@ class MenuOperations:
             # session.refresh()
             return result.scalar_one_or_none()
 
-    def edit_menu_item(self, menu_id: int, menu_item: MenuSchema):
+    def edit_menu(self, menu_id: int, menu_item: MenuSchema):
         with Session(self.engine) as session:
             to_edit = session.get(Menu, menu_id)
             if to_edit:
