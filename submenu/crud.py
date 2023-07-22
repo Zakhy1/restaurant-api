@@ -17,7 +17,8 @@ class SubMenuOperations:
 
     def get_submenu(self, menu_id: int, submenu_id: int):  # TODO
         with Session(self.engine) as session:
-            query = select(SubMenu).where(SubMenu.menu_id == menu_id and SubMenu.menu_id == submenu_id)
+            query = select(SubMenu).where(SubMenu.id == submenu_id)\
+                                   .where(SubMenu.menu_id == menu_id)
             res = session.execute(query)
             return res.scalar_one_or_none()
 
@@ -46,7 +47,7 @@ class SubMenuOperations:
             else:
                 return {"error": f"menu with id {menu_id} not found"}
 
-    def delete_menu_item(self, menu_id: int, submenu_id: int):
+    def delete_submenu_item(self, menu_id: int, submenu_id: int):
         with Session(self.engine) as session:
             to_delete = session.get(SubMenu, submenu_id)
             session.delete(to_delete)
