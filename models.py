@@ -19,7 +19,7 @@ class Menu(Base):
     description: Mapped[str] = mapped_column(String(128))
 
     submenus: Mapped[List["SubMenu"]] = relationship(
-        back_populates="menu", cascade="all, delete-orphan"
+        back_populates="menu", cascade="all, delete"
     )
 
     def __repr__(self) -> str:
@@ -40,7 +40,7 @@ class SubMenu(Base):
     menu: Mapped["Menu"] = relationship(back_populates="submenus")
 
     dishes: Mapped[List["Dish"]] = relationship(
-        back_populates="submenu", cascade="all, delete-orphan"
+        back_populates="submenu", cascade="all, delete"
     )
 
     def __repr__(self) -> str:

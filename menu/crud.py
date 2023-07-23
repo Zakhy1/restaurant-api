@@ -1,8 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 
 from menu.schema import Menu as MenuSchema
-from models import Menu
+from models import Menu, SubMenu, Dish
 
 
 class MenuOperations:
@@ -16,8 +16,21 @@ class MenuOperations:
 
     def get_menu(self, menu_id: int):
         with Session(self.engine) as session:
-            menu = session.get(Menu, menu_id)
-            return menu
+            query = select(Menu).where(Menu.id == menu_id).select_from()
+            menu = session.execute(query).scalar_one_or_none()
+
+            query = select(func.count("*")).where(SubMenu.menu_id == menu_id).select_from(SubMenu)
+            result = session.execute(query)
+            submenus_count = result.scalar()
+
+            query = select(func.count("*")).where(SubMenu.menu_id == menu_id).select_from(SubMenu) \
+                .where(Dish.submenu_id == SubMenu.id)
+            dishes_count = session.execute(query).scalar()
+            if menu:
+                return {"id": str(menu.id), "title": menu.title,
+                        "description": menu.description, "submenus_count": submenus_count, "dishes_count": dishes_count}
+            else:
+                return None
 
     def add_menu(self, menu: MenuSchema):  # TODO TEST
         with Session(self.engine) as session:
@@ -28,10 +41,10 @@ class MenuOperations:
             new_menu = Menu(title=menu.title, description=menu.description)
             session.add(new_menu)
             query = select(Menu).where(Menu.title == menu.title)  # todo refactor with 2 queries
-            result = session.execute(query)
+            result = session.execute(query).scalar_one_or_none()
             session.commit()
             # session.refresh()
-            return result.scalar_one_or_none()
+            return {"id": str(result.id), "title": result.title, "description": result.description}
 
     def edit_menu(self, menu_id: int, menu_item: MenuSchema):
         with Session(self.engine) as session:
@@ -40,7 +53,7 @@ class MenuOperations:
                 to_edit.title = menu_item.title
                 to_edit.description = menu_item.description
                 session.commit()
-                return {"id": to_edit.id, "title": to_edit.title, "description": to_edit.description}
+                return {"id": str(to_edit.id), "title": to_edit.title, "description": to_edit.description}
             else:
                 return {"error": f"menu with id {menu_id} not found"}
 
