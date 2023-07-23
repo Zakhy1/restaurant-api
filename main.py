@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from database import engine
+from dishes.crud import DishOperations
+from dishes.schema import Dishes as DishSchema
 from menu.crud import MenuOperations
 from menu.schema import Menu as MenuSchema
 from submenu.crud import SubMenuOperations
@@ -87,24 +89,34 @@ async def delete_submenu(menu_id: int, submenu_id: int):
 # Блюда
 @app.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes")
 async def get_dishes(menu_id: int, submenu_id: int):
-    pass
+    dish_crud = DishOperations(engine)
+    dishes = dish_crud.get_dishes(menu_id, submenu_id)
+    return {"dishes": dishes}
 
 
 @app.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}")
 async def get_dish(menu_id: int, submenu_id: int, dish_id: int):
-    pass
+    dish_crud = DishOperations(engine)
+    dish = dish_crud.get_dish(menu_id, submenu_id, dish_id)
+    return {"dish": dish}
 
 
 @app.post("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes")
-async def add_dish(menu_id: int, submenu_id: int):
-    pass
+async def add_dish(menu_id: int, submenu_id: int, dish: DishSchema):
+    dish_crud = DishOperations(engine)
+    dish = dish_crud.add_dish(menu_id, submenu_id, dish)
+    return {"dish": dish}
 
 
 @app.patch("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}")
-async def edit_dish(menu_id: int, submenu_id: int, dish_id: int):
-    pass
+async def edit_dish(menu_id: int, submenu_id: int, dish_id: int, dish: DishSchema):
+    dish_crud = DishOperations(engine)
+    to_edit = dish_crud.edit_dish(menu_id, submenu_id, dish_id, dish)
+    return {"dish": to_edit}
 
 
 @app.delete("/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}")
 async def delete_dish(menu_id: int, submenu_id: int, dish_id: int):
-    pass
+    dish_crud = DishOperations(engine)
+    to_delete = dish_crud.delete_dish(menu_id, submenu_id, dish_id)
+    return {"dish": to_delete}
