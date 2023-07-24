@@ -1,3 +1,5 @@
+import sys
+
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -5,6 +7,8 @@ from sqlalchemy.orm import Session
 from models import Dish
 from models import SubMenu
 from submenu.schema import SubMenu as SubMenuSchema
+
+sys.setrecursionlimit(2000)
 
 
 class SubMenuOperations:
@@ -69,7 +73,10 @@ class SubMenuOperations:
 
     def delete_submenu(self, menu_id: int, submenu_id: int):  # TODO FIX CASCADE DELETE
         with Session(self.engine) as session:
-            to_delete = session.get(SubMenu, submenu_id)
-            session.delete(to_delete)
-            session.commit()
-            return to_delete
+            result = session.query(SubMenu).filter_by(id=submenu_id).scalar()
+            if result:
+                session.delete(result)
+                session.commit()
+                return {"id": str(result.id), "title": result.title, "description": result.description}
+            else:
+                return None

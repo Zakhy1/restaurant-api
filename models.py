@@ -19,7 +19,7 @@ class Menu(Base):
     description: Mapped[str] = mapped_column(String(128))
 
     submenus: Mapped[List["SubMenu"]] = relationship(
-        back_populates="menu", cascade="all, delete"
+        back_populates="menu", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
@@ -40,7 +40,7 @@ class SubMenu(Base):
     menu: Mapped["Menu"] = relationship(back_populates="submenus")
 
     dishes: Mapped[List["Dish"]] = relationship(
-        back_populates="submenu", cascade="all, delete"
+        back_populates="submenu", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:
@@ -58,8 +58,8 @@ class Dish(Base):
     description: Mapped[str] = mapped_column(String(128))
     price: Mapped[float] = mapped_column(Float())
 
-    submenu_id: Mapped[int] = mapped_column(ForeignKey("submenus.id"))
-    submenu: Mapped["SubMenu"] = relationship(back_populates="dishes")
+    submenu_id: Mapped[int] = mapped_column(ForeignKey("submenus.id", ondelete="CASCADE"))
+    submenu: Mapped["SubMenu"] = relationship(back_populates="dishes", cascade="all, delete-orphan", single_parent=True)
 
     def __repr__(self) -> str:
         return f"Dish(id={self.id}, title={self.title}, description={self.description}, price={self.price}, " \

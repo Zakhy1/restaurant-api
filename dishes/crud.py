@@ -77,6 +77,15 @@ class DishOperations:
             if to_delete:
                 session.delete(to_delete)
                 session.commit()
-                return to_delete
+                return {"id": str(to_delete.id), "title": to_delete.title,
+                        "description": to_delete.description, "price":to_delete.price}
             else:
                 return f"there is no dish with id {dish_id}"
+
+    def delete_all_dishes(self, submenu_id: int):
+        with Session(self.engine) as session:
+            to_delete = session.scalars(select(Dish).where(Dish.submenu_id == submenu_id)).fetchall()
+            for i in to_delete:
+                session.delete(i)
+            session.commit()
+            return to_delete
