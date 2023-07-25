@@ -22,7 +22,7 @@ async def get_menus():
 
 
 @app.get("/api/v1/menus/{menu_id}")
-async def get_menu(menu_id):  # TODO COUNT SUBMENUS
+async def get_menu(menu_id):
     menu_crud = MenuOperations(engine)
     menu = menu_crud.get_menu(menu_id)
     if menu:
@@ -63,7 +63,7 @@ async def get_submenus(menu_id: int):
 
 
 @app.get("/api/v1/menus/{menu_id}/submenus/{submenu_id}")
-async def get_submenu(menu_id, submenu_id):  # TODO COUNT DISHES
+async def get_submenu(menu_id, submenu_id):
     submenu_crud = SubMenuOperations(engine)
     submenu = submenu_crud.get_submenu(menu_id, submenu_id)
     if submenu:

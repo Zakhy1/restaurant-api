@@ -21,7 +21,7 @@ class SubMenuOperations:
             submenus = session.execute(query)
             return submenus.fetchall()
 
-    def get_submenu(self, menu_id: int, submenu_id: int):  # TODO
+    def get_submenu(self, menu_id: int, submenu_id: int):
         with Session(self.engine) as session:
             query = select(SubMenu).where(SubMenu.id == submenu_id) \
                 .where(SubMenu.menu_id == menu_id)
@@ -39,7 +39,7 @@ class SubMenuOperations:
             else:
                 return None
 
-    def add_submenu(self, menu_id: int, submenu: SubMenuSchema):  # todo ref
+    def add_submenu(self, menu_id: int, submenu: SubMenuSchema):
         with Session(self.engine) as session:
 
             query = select(SubMenu).where(SubMenu.title == submenu.title)
@@ -51,7 +51,7 @@ class SubMenuOperations:
                 title=submenu.title, description=submenu.description, menu_id=menu_id)
             session.add(new_submenu)
 
-            query = select(SubMenu).where(SubMenu.title == submenu.title)  # todo refactor with 2 queries
+            query = select(SubMenu).where(SubMenu.title == submenu.title)
             submenu = session.execute(query)
             result = submenu.scalar_one_or_none()
             session.commit()
@@ -71,7 +71,7 @@ class SubMenuOperations:
             else:
                 return {"error": f"submenu with id {submenu_id} not found id menu with id {menu_id}"}
 
-    def delete_submenu(self, menu_id: int, submenu_id: int):  # TODO FIX CASCADE DELETE
+    def delete_submenu(self, menu_id: int, submenu_id: int):
         with Session(self.engine) as session:
             result = session.query(SubMenu).filter_by(id=submenu_id).scalar()
             if result:
