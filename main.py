@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException
-
+from fastapi import FastAPI
+from fastapi import HTTPException
 from database import engine
 from dishes.crud import DishOperations
 from dishes.schema import Dishes as DishSchema
@@ -32,9 +32,7 @@ async def get_menu(menu_id):  # TODO COUNT SUBMENUS
 async def add_menu(new_menu: MenuSchema):
     menu_crud = MenuOperations(engine)
     new_menu = menu_crud.add_menu(new_menu)
-    if new_menu:
-        return new_menu
-    return None
+    return new_menu
 
 
 @app.patch("/api/v1/menus/{menu_id}")

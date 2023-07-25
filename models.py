@@ -1,6 +1,8 @@
 from typing import List
-from sqlalchemy import String, Float
+
+from sqlalchemy import Float
 from sqlalchemy import ForeignKey
+from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
