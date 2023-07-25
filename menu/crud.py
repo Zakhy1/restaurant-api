@@ -43,7 +43,6 @@ class MenuOperations:
             query = select(Menu).where(Menu.title == menu.title)
             result = session.execute(query).scalar_one_or_none()
             session.commit()
-            # session.refresh()
             return {"id": str(result.id), "title": result.title, "description": result.description}
 
     def edit_menu(self, menu_id: int, menu_item: MenuSchema):
