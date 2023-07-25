@@ -10,11 +10,11 @@
 3. Запустить файл docker-compose.yml
 4. Создать таблицы следующим кодом:
 
-```
-from models import Base
-from database import engine
-Base.metadata.drop_all(engine)
-Base.metadata.create_all(engine)
-```
+    ```
+    from models import Base
+    from database import engine
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+    ```
 
 5. uvicorn main:app --reload
