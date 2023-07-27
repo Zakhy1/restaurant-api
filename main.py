@@ -1,34 +1,24 @@
-from typing_extensions import Annotated
-
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi import HTTPException
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from database import engine
+
 from dishes.crud import DishOperations
 from dishes.schema import Dishes as DishSchema
 from menu.crud import MenuOperations
 from menu.schema import Menu as MenuSchema
 from submenu.crud import SubMenuOperations
 from submenu.schema import SubMenu as SubMenuSchema
-from users.crud import UserOperations
 
 app = FastAPI()
-
-security = HTTPBasic()
 
 
 # Меню
 @app.get("/api/v1/menus")
-async def get_menus(credentials: Annotated[HTTPBasicCredentials, Depends(security)]):
-    users_crud = UserOperations(engine)
-    is_user_exist = users_crud.get_user(credentials.username, credentials.password)
-    if is_user_exist:
-        menu_crud = MenuOperations(engine)
-        menus = menu_crud.get_menus()
-        return menus
-    else:
-        raise HTTPException(status_code=401, detail="user don't exist")
+async def get_menus():
+    menu_crud = MenuOperations(engine)
+    menus = menu_crud.get_menus()
+    return menus
 
 
 @app.get("/api/v1/menus/{menu_id}")
