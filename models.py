@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import Float, Numeric
+from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase
@@ -58,7 +58,7 @@ class Dish(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(128), unique=True)
     description: Mapped[str] = mapped_column(String(128))
-    price: Mapped[Numeric] = mapped_column(Float())
+    price: Mapped[float] = mapped_column(Float())
 
     submenu_id: Mapped[int] = mapped_column(ForeignKey("submenus.id", ondelete="CASCADE"))
     submenu: Mapped["SubMenu"] = relationship(back_populates="dishes", cascade="all, delete-orphan", single_parent=True)

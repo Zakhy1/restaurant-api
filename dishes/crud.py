@@ -78,7 +78,7 @@ class DishOperations:
                 session.delete(to_delete)
                 session.commit()
                 return {"id": str(to_delete.id), "title": to_delete.title,
-                        "description": to_delete.description, "price": to_delete.price}
+                        "description": to_delete.description, "price":to_delete.price}
             else:
                 return f"there is no dish with id {dish_id}"
 
