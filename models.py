@@ -69,3 +69,11 @@ class Dish(Base):
 
     def __str__(self):
         str(self)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(String(128))
+    password: Mapped[str] = mapped_column(String(128))
