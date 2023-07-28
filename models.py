@@ -58,7 +58,7 @@ class Dish(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(128), unique=True)
     description: Mapped[str] = mapped_column(String(128))
-    price: Mapped[Numeric] = mapped_column(Float())
+    price: Mapped[Numeric] = mapped_column(Float(4))
 
     submenu_id: Mapped[int] = mapped_column(ForeignKey("submenus.id", ondelete="CASCADE"))
     submenu: Mapped["SubMenu"] = relationship(back_populates="dishes", cascade="all, delete-orphan", single_parent=True)

@@ -77,6 +77,6 @@ class SubMenuOperations:
             if result:
                 session.delete(result)
                 session.commit()
-                return {"id": str(result.id), "title": result.title, "description": result.description}
+                return {'message': 'The menu has been deleted', 'status': True}
             else:
                 return None

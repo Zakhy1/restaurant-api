@@ -77,8 +77,8 @@ class DishOperations:
             if to_delete:
                 session.delete(to_delete)
                 session.commit()
-                return {"id": str(to_delete.id), "title": to_delete.title,
-                        "description": to_delete.description, "price": to_delete.price}
+                return {"status": True,
+                        "message": "The menu has been deleted"}
             else:
                 return f"there is no dish with id {dish_id}"
 

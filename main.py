@@ -47,8 +47,9 @@ async def edit_menu(menu_id: int, new_data: MenuSchema):
 @app.delete("/api/v1/menus/{menu_id}")
 async def delete_menu(menu_id: int):
     menu_crud = MenuOperations(engine)
-    deleted_item = menu_crud.delete_menu_item(menu_id)
-    return deleted_item
+    menu_crud.delete_menu_item(menu_id)
+    return {"status": True,
+            "message": "The menu has been deleted"}
 
 
 # Подменю

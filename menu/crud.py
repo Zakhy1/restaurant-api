@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from sqlalchemy.orm import Session
 
 from menu.schema import Menu as MenuSchema
@@ -58,7 +58,9 @@ class MenuOperations:
 
     def delete_menu_item(self, menu_id: int):
         with Session(self.engine) as session:
-            to_delete = session.get(Menu, menu_id)
-            session.delete(to_delete)
+            query = select(Menu).where(Menu.id == menu_id)
+            to_delete = session.execute(query).scalar_one_or_none()
+            query = delete(Menu).where(Menu.id == menu_id)
+            session.execute(query)
             session.commit()
             return to_delete
