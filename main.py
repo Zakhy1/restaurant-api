@@ -13,6 +13,11 @@ from submenu.schema import SubMenu as SubMenuSchema
 app = FastAPI()
 
 
+@app.get("/")
+async def ping():
+    return "hello"
+
+
 # Меню
 @app.get("/api/v1/menus")
 async def get_menus():
