@@ -1,6 +1,6 @@
 version: '3'
 networks:
-  PlayNetwork:
+  test-network:
 services:
   db:
     container_name: postgres-rest
@@ -10,12 +10,14 @@ services:
     restart: always
     ports:
       - '5432:5432'
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_USER=restaurant_manager
+      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
+      - POSTGRES_DB=restaurant_api
     networks:
-      - PlayNetwork
+      - test-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U restaurant_manager -d restaurant_api"]
+      test: [ "CMD-SHELL", "pg_isready -U restaurant_manager -d restaurant_api" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,18 +31,30 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - POSTGRES_HOST=postgres-rest
+      - POSTGRES_USER=restaurant_manager
+      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
+      - POSTGRES_DB=restaurant_api
     networks:
-      - PlayNetwork
+      - test-network
 
   tests:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-test
     networks:
-      - PlayNetwork
-    command: pytest tests/menu_test.py tests/submenu_test.py tests/dish_test.py
+      - test-network
+    command: >
+      bash -c "python create_tables.py 
+      && pytest tests/menu_test.py tests/submenu_test.py tests/dish_test.py"
     depends_on:
       db:
         condition: service_healthy
       app:
         condition: service_started
+    environment:
+      - POSTGRES_USER=restaurant_manager
+      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
+      - POSTGRES_DB=restaurant_api
+      - POSTGRES_HOST=postgres-rest

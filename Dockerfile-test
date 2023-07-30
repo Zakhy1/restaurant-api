@@ -3,4 +3,7 @@ WORKDIR /app
 COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
-#RUN python -u ./create_tables.py
+ENV POSTGRES_USER restaurant_manager
+ENV POSTGRES_PASSWORD b24de59f8c8fe841be3b
+ENV POSTGRES_DB restaurant_api
+ENV POSTGRES_HOST postgres-rest
