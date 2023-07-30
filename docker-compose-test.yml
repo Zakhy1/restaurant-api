@@ -1,6 +1,6 @@
 version: '3'
 networks:
-  mynetwork:
+  PlayNetwork:
 services:
   db:
     container_name: postgres-rest
@@ -13,7 +13,7 @@ services:
     env_file:
       - .env
     networks:
-      - mynetwork
+      - PlayNetwork
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U restaurant_manager -d restaurant_api"]
       interval: 10s
@@ -30,14 +30,14 @@ services:
       db:
         condition: service_healthy
     networks:
-      - mynetwork
+      - PlayNetwork
 
   tests:
     build:
       context: .
       dockerfile: Dockerfile
     networks:
-      - mynetwork
+      - PlayNetwork
     command: pytest tests/menu_test.py tests/submenu_test.py tests/dish_test.py
     depends_on:
       db:

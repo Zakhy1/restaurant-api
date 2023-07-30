@@ -7,4 +7,4 @@
 docker-compose up
 
 #### Запуск приложения + тестов
-docker-compose-test up
+docker-compose -f docker-compose-test.yaml up
