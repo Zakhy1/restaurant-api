@@ -4,9 +4,8 @@ from pydantic import BaseModel
 class DishSchema(BaseModel):
     title: str
     description: str
-    price: float
+    price: str | float
 
 
 class DishSchemaResponse(DishSchema):
     id: str | int
-    price: str
