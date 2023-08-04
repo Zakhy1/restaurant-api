@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import db_session
 
-from app.menu.schemas import MenuSchemaResponse, MenuSchema
+from app.menu.schemas import MenuSchema
 from app.models import Menu
 
 
@@ -14,22 +14,12 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
 
     def get_all(self):
         menus = self.session.execute(select(Menu)).scalars().all()
-        menus_lst = []
-        for item in menus:
-            response = MenuSchemaResponse(**item.__dict__)
-            response.id = str(response.id)
-            menus_lst.append(response)
-        return menus_lst
+        return menus
 
     def get_one(self, menu_id: int):
         query = select(Menu).where(Menu.id == menu_id)
         menu = self.session.execute(query).scalar_one_or_none()
-        if menu:
-            menu_dict = menu.__dict__
-            menu_dict["id"] = str(menu_dict["id"])
-            return MenuSchemaResponse(**menu_dict)
-        else:
-            raise HTTPException(status_code=404, detail="menu not found")
+        return menu
 
     def post(self, menu: MenuSchema):
         new_menu = Menu(
@@ -38,9 +28,7 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
         self.session.add(new_menu)
         self.session.commit()
         self.session.refresh(new_menu)
-        menu_dict = new_menu.__dict__
-        menu_dict["id"] = str(menu_dict["id"])
-        return MenuSchemaResponse(**menu_dict)
+        return new_menu
 
     def patch(self, menu_id: int, menu: MenuSchema):
         to_edit = self.session.get(Menu, menu_id)
@@ -49,9 +37,7 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
             to_edit.description = menu.description
             self.session.commit()
             self.session.refresh(to_edit)
-            menu_dict = to_edit.__dict__
-            menu_dict["id"] = str(menu_dict["id"])
-            return MenuSchemaResponse(**menu_dict)
+            return to_edit
         else:
             raise HTTPException(status_code=404, detail="menu not found")
 

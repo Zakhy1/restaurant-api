@@ -20,32 +20,20 @@ class SubMenuRepository:
     def get_all(self, menu_id: int):
         query_result = self.session.execute(select(SubMenu).where(SubMenu.menu_id == menu_id))
         submenus = query_result.scalars().all()
-        submenus_lst = []
-        for submenu in submenus:
-            submenu_response = SubMenuSchemaResponse(**submenu.__dict__)
-            submenu_response.id = str(submenu_response.id)
-            submenus_lst.append(submenu_response)
-        return submenus_lst
+        return submenus
 
     def get_one(self, menu_id: int, submenu_id: int):
         query = select(SubMenu).where(and_(SubMenu.id == submenu_id, SubMenu.menu_id == menu_id))
         query_result = self.session.execute(query)
         submenu = query_result.scalar_one_or_none()
-        if submenu:
-            submenu_dict = submenu.__dict__
-            submenu_dict["id"] = str(submenu_dict["id"])
-            return SubMenuSchemaResponse(**submenu_dict)
-        else:
-            raise HTTPException(status_code=404, detail="submenu not found")
+        return submenu
 
     def post(self, menu_id: int, submenu: SubMenuSchema):
         new_submenu = SubMenu(menu_id=menu_id, **submenu.model_dump())
         self.session.add(new_submenu)
         self.session.commit()
         self.session.refresh(new_submenu)
-        to_return = new_submenu.__dict__
-        to_return["id"] = str(to_return["id"])
-        return SubMenuSchemaResponse(**to_return)
+        return new_submenu
 
     def patch(self, menu_id, submenu_id, submenu: SubMenuSchema):
         query = select(SubMenu).where(and_(SubMenu.id == submenu_id, SubMenu.menu_id == menu_id))
@@ -56,9 +44,7 @@ class SubMenuRepository:
             to_edit.description = submenu.description
             self.session.commit()
             self.session.refresh(to_edit)
-            to_return = to_edit.__dict__
-            to_return["id"] = str(to_return["id"])
-            return SubMenuSchemaResponse(**to_return)
+            return to_edit
         else:
             raise HTTPException(status_code=404, detail="submenu not found")
 
