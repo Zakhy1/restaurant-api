@@ -2,8 +2,8 @@ from sqlalchemy import and_
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from models import Dish, Menu
-from models import SubMenu
+from app.models import Dish, Menu
+from app.models import SubMenu
 
 
 class DishOperations:

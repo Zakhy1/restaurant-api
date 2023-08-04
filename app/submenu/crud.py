@@ -4,9 +4,9 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from models import Dish
-from models import SubMenu
-from submenu.schema import SubMenu as SubMenuSchema
+from app.models import Dish
+from app.models import SubMenu
+from app.submenu.schema import SubMenu as SubMenuSchema
 
 sys.setrecursionlimit(2000)
 

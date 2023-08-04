@@ -1,8 +1,8 @@
 from sqlalchemy import select, func, delete
 from sqlalchemy.orm import Session
 
-from menu.schema import Menu as MenuSchema
-from models import Menu, SubMenu, Dish
+from app.menu.schema import Menu as MenuSchema
+from app.models import Menu, SubMenu, Dish
 
 
 class MenuOperations:

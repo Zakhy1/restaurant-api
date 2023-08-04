@@ -1,17 +1,16 @@
 from fastapi import FastAPI
 from fastapi import HTTPException
 
-from database import engine
+from app.database import engine
 
-from dishes.crud import DishOperations
-from dishes.schema import Dishes as DishSchema
-from menu.crud import MenuOperations
-from menu.schema import Menu as MenuSchema
-from submenu.crud import SubMenuOperations
-from submenu.schema import SubMenu as SubMenuSchema
+from app.dishes.crud import DishOperations
+from app.dishes.schema import Dishes as DishSchema
+from app.menu.crud import MenuOperations
+from app.menu.schema import Menu as MenuSchema
+from app.submenu.crud import SubMenuOperations
+from app.submenu.schema import SubMenu as SubMenuSchema
 
 app = FastAPI()
-
 
 
 # Меню
