@@ -2,13 +2,10 @@ from sqlalchemy import select, func, delete
 from sqlalchemy.orm import Session
 
 from app.menu.schema import Menu as MenuSchema
-from app.models import Menu, SubMenu, Dish
+from app.models import Menu, SubMenu, Dish, CrudOperations
 
 
-class MenuOperations:
-    def __init__(self, engine):
-        self.engine = engine
-
+class MenuOperations(CrudOperations):
     def get_menus(self):
         with Session(self.engine) as session:
             menus = session.query(Menu).all()

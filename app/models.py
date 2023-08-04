@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import Float, Numeric, select, func
+from sqlalchemy import Float, Numeric, select, func, Engine
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase, column_property
@@ -85,3 +85,8 @@ class Menu(Base):
 
     def __str__(self):
         str(self)
+
+
+class CrudOperations:
+    def __init__(self, engine: Engine):
+        self.engine = engine

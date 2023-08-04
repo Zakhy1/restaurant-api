@@ -2,14 +2,11 @@ from sqlalchemy import and_
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Dish, Menu
+from app.models import Dish, Menu, CrudOperations
 from app.models import SubMenu
 
 
-class DishOperations:
-    def __init__(self, engine):
-        self.engine = engine
-
+class DishOperations(CrudOperations):
     def get_dishes(self, menu_id: int, submenu_id: int):
         with Session(self.engine) as session:
             query = select(Dish).join(SubMenu).where(and_(SubMenu.menu_id == menu_id, Dish.submenu_id == submenu_id))

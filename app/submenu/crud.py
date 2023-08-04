@@ -4,17 +4,14 @@ from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Dish
+from app.models import Dish, CrudOperations
 from app.models import SubMenu
 from app.submenu.schema import SubMenu as SubMenuSchema
 
 sys.setrecursionlimit(2000)
 
 
-class SubMenuOperations:
-    def __init__(self, engine):
-        self.engine = engine
-
+class SubMenuOperations(CrudOperations):
     def get_submenus(self, menu_id: int):
         with Session(self.engine) as session:
             query = select(SubMenu).where(SubMenu.menu_id == menu_id)
