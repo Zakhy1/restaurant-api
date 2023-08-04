@@ -1,63 +1,62 @@
-from sqlalchemy import select, func, delete
+from fastapi import HTTPException
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
-from app.menu.schema import Menu as MenuSchema
-from app.models import Menu, SubMenu, Dish, CrudOperations
+from app.database import db_session
+
+from app.menu.schemas import MenuSchemaResponse, MenuSchema
+from app.models import Menu
 
 
-class MenuOperations(CrudOperations):
-    def get_menus(self):
-        with Session(self.engine) as session:
-            menus = session.query(Menu).all()
-            return menus
+class MenuRepository:  # TODO Вынести в notify обработку после запросов
+    def __init__(self, session: Session = db_session):
+        self.session: Session = session
 
-    def get_menu(self, menu_id: int):
-        with Session(self.engine) as session:
-            query = select(Menu).where(Menu.id == menu_id).select_from()
-            menu = session.execute(query).scalar_one_or_none()
+    def get_all(self):
+        menus = self.session.execute(select(Menu)).scalars().all()
+        menus_lst = []
+        for item in menus:
+            response = MenuSchemaResponse(**item.__dict__)
+            response.id = str(response.id)
+            menus_lst.append(response)
+        return menus_lst
 
-            query = select(func.count("*")).where(SubMenu.menu_id == menu_id).select_from(SubMenu)
-            result = session.execute(query)
-            submenus_count = result.scalar()
+    def get_one(self, menu_id: int):
+        query = select(Menu).where(Menu.id == menu_id)
+        menu = self.session.execute(query).scalar_one_or_none()
+        if menu:
+            menu_dict = menu.__dict__
+            menu_dict["id"] = str(menu_dict["id"])
+            return MenuSchemaResponse(**menu_dict)
+        else:
+            raise HTTPException(status_code=404, detail="menu not found")
 
-            query = select(func.count("*")).where(SubMenu.menu_id == menu_id).select_from(SubMenu) \
-                .where(Dish.submenu_id == SubMenu.id)
-            dishes_count = session.execute(query).scalar()
-            if menu:
-                return {"id": str(menu.id), "title": menu.title,
-                        "description": menu.description, "submenus_count": submenus_count, "dishes_count": dishes_count}
-            else:
-                return None
+    def post(self, menu: MenuSchema):
+        new_menu = Menu(
+            **menu.model_dump()
+        )
+        self.session.add(new_menu)
+        self.session.commit()
+        self.session.refresh(new_menu)
+        menu_dict = new_menu.__dict__
+        menu_dict["id"] = str(menu_dict["id"])
+        return MenuSchemaResponse(**menu_dict)
 
-    def add_menu(self, menu: MenuSchema):
-        with Session(self.engine) as session:
-            query = select(Menu).where(Menu.title == menu.title)
-            result = session.execute(query).scalar_one_or_none()
-            if result:
-                return {"error": f"menu with name '{menu.title}' already exist"}
-            new_menu = Menu(title=menu.title, description=menu.description)
-            session.add(new_menu)
-            query = select(Menu).where(Menu.title == menu.title)
-            result = session.execute(query).scalar_one_or_none()
-            session.commit()
-            return {"id": str(result.id), "title": result.title, "description": result.description}
+    def patch(self, menu_id: int, menu: MenuSchema):
+        to_edit = self.session.get(Menu, menu_id)
+        if to_edit:
+            to_edit.title = menu.title
+            to_edit.description = menu.description
+            self.session.commit()
+            self.session.refresh(to_edit)
+            menu_dict = to_edit.__dict__
+            menu_dict["id"] = str(menu_dict["id"])
+            return MenuSchemaResponse(**menu_dict)
+        else:
+            raise HTTPException(status_code=404, detail="menu not found")
 
-    def edit_menu(self, menu_id: int, menu_item: MenuSchema):
-        with Session(self.engine) as session:
-            to_edit = session.get(Menu, menu_id)
-            if to_edit:
-                to_edit.title = menu_item.title
-                to_edit.description = menu_item.description
-                session.commit()
-                return {"id": str(to_edit.id), "title": to_edit.title, "description": to_edit.description}
-            else:
-                return {"error": f"menu with id {menu_id} not found"}
-
-    def delete_menu_item(self, menu_id: int):
-        with Session(self.engine) as session:
-            query = select(Menu).where(Menu.id == menu_id)
-            to_delete = session.execute(query).scalar_one_or_none()
-            query = delete(Menu).where(Menu.id == menu_id)
-            session.execute(query)
-            session.commit()
-            return to_delete
+    def delete(self, menu_id: int):
+        query = delete(Menu).where(Menu.id == menu_id)
+        self.session.execute(query)
+        self.session.commit()
+        return {"status": True, "message": "The menu has been deleted"}

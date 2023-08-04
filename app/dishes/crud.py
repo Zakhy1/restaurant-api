@@ -1,88 +1,73 @@
-from sqlalchemy import and_
+from fastapi import HTTPException
+from sqlalchemy import and_, delete
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Dish, Menu, CrudOperations
+from app.database import db_session
+from app.dishes.schemas import DishSchemaResponse, DishSchema
+from app.models import Dish
 from app.models import SubMenu
 
 
-class DishOperations(CrudOperations):
-    def get_dishes(self, menu_id: int, submenu_id: int):
-        with Session(self.engine) as session:
-            query = select(Dish).join(SubMenu).where(and_(SubMenu.menu_id == menu_id, Dish.submenu_id == submenu_id))
-            dishes = session.execute(query)
-            return dishes.fetchall()
+class DishRepository:
+    def __init__(self, session: Session = db_session):
+        self.session: Session = session
 
-    def get_dish(self, menu_id: int, submenu_id: int, dish_id: int):
-        with Session(self.engine) as session:
-            query = select(Dish).join(SubMenu).where(and_(SubMenu.menu_id == menu_id,
-                                                          Dish.submenu_id == submenu_id, Dish.id == dish_id))
-            dish = session.execute(query)
-            result = dish.scalar_one_or_none()
-            if result:
-                return {"id": str(result.id), "title": result.title,
-                        "description": result.description, "price": str(result.price)}
-            else:
-                return None
+    def get_all(self, menu_id: int, submenu_id: int):
+        query = select(Dish).join(SubMenu).where(and_(Dish.submenu_id == submenu_id, SubMenu.menu_id == menu_id))
+        query_result = self.session.execute(query)
+        dishes = query_result.scalars().all()
+        dishes_list = []
+        for dish in dishes:
+            dish_response = DishSchemaResponse(**dish.__dict__)
+            dish_response.id = str(dish_response.id)
+            dish_response.price = str(round(dish_response.price, 2))
+            dishes_list.append(dish_response)
+        return dishes_list
 
-    def add_dish(self, menu_id, submenu_id, dish):
-        with Session(self.engine) as session:
-            query = select(Menu).where(Menu.id == menu_id)
-            menu = session.execute(query)
-            if not menu:
-                return "menu does not exist"
-            query = select(SubMenu).where(SubMenu.id == submenu_id)
-            submenu = session.execute(query)
-            if not submenu:
-                return "submenu does not exist"
+    def get_one(self, menu_id: int, submenu_id: int, dish_id: int):
+        query = select(Dish).join(SubMenu).where(and_(SubMenu.menu_id == menu_id,
+                                                      Dish.submenu_id == submenu_id, Dish.id == dish_id))
+        query_result = self.session.execute(query)
+        dish = query_result.scalar_one_or_none()
+        if dish:
+            dish_dict = dish.__dict__
+            dish_dict["id"] = str(dish_dict["id"])
+            dish_dict["price"] = str(round(dish_dict["price"], 2))
+            return DishSchemaResponse(**dish_dict)
+        else:
+            raise HTTPException(status_code=404, detail="dish not found")
 
-            query = select(Dish).where(Dish.title == dish.title)
-            unique_dish = session.execute(query)
-            if unique_dish.scalar_one_or_none():
-                return f"dish with name {dish.title} exist in submenu {submenu_id} in menu {menu_id}"
+    def post(self, menu_id, submenu_id, dish: DishSchema):
+        new_dish = Dish(submenu_id=submenu_id, **dish.model_dump())
+        self.session.add(new_dish)
+        self.session.commit()
+        self.session.refresh(new_dish)
+        to_return = new_dish.__dict__
+        to_return["id"] = str(to_return["id"])
+        to_return["price"] = str(round(to_return["price"], 2))
+        return DishSchemaResponse(**to_return)
 
-            new_dish = Dish(title=dish.title, description=dish.description, price=dish.price, submenu_id=submenu_id)
-            session.add(new_dish)
+    def patch(self, menu_id: int, submenu_id: int, dish_id: int, dish: DishSchema):
+        query = select(Dish).join(SubMenu).where(and_(SubMenu.menu_id == menu_id,
+                                                      Dish.submenu_id == submenu_id, Dish.id == dish_id))
+        result = self.session.execute(query)
+        to_edit = result.scalar_one_or_none()
+        if to_edit:
+            to_edit.title = dish.title
+            to_edit.description = dish.description
+            to_edit.price = dish.price
+            self.session.commit()
+            self.session.refresh(to_edit)
+            to_return = to_edit.__dict__
+            to_return["id"] = str(to_return["id"])
+            to_return["price"] = str(round(to_return["price"], 2))
+            return DishSchemaResponse(**to_return)
+        else:
+            raise HTTPException(status_code=404, detail="dish not found")
 
-            query = select(Dish).where(Dish.title == dish.title)
-            dish_to_return = session.execute(query)
-            result = dish_to_return.scalar_one_or_none()
-            session.commit()
-            if result:
-                return {"id": str(result.id), "title": result.title,
-                        "description": result.description, "price": str(result.price)}
-            else:
-                return None
-
-    def edit_dish(self, menu_id: int, submenu_id: int, dish_id: int, dish):
-        with Session(self.engine) as session:
-            to_edit = session.get(Dish, dish_id)
-            if to_edit:
-                to_edit.title = dish.title
-                to_edit.description = dish.description
-                to_edit.price = dish.price
-                session.commit()
-                return {"id": str(to_edit.id), "title": to_edit.title,
-                        "description": to_edit.description, "price": str(to_edit.price)}
-            else:
-                return {"error": f"dish with id {dish_id} not found "
-                                 f"id submenu with id {submenu_id} in menu with id {menu_id}"}
-
-    def delete_dish(self, menu_id: int, submenu_id: int, dish_id: int, ):
-        with Session(self.engine) as session:
-            to_delete = session.get(Dish, dish_id)
-            if to_delete:
-                session.delete(to_delete)
-                session.commit()
-                return {"status": True,
-                        "message": "The menu has been deleted"}
-            else:
-                return f"there is no dish with id {dish_id}"
-
-    def delete_all_dishes(self, submenu_id: int):
-        with Session(self.engine) as session:
-            to_delete = session.scalars(select(Dish).where(Dish.submenu_id == submenu_id)).fetchall()
-            for i in to_delete:
-                session.delete(i)
-            session.commit()
-            return to_delete
+    def delete(self, menu_id: int, submenu_id: int, dish_id: int, ):
+        query = delete(Dish).where(Dish.id == dish_id)
+        self.session.execute(query)
+        self.session.commit()
+        return {"status": True, "message": "The dish has been deleted"}

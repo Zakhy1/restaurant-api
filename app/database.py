@@ -19,5 +19,11 @@ engine = create_engine(
     url=SQLALCHEMY_DATABASE_URL,
     echo=True  # Turn off when send
 )
+
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db_session = Session()
+
+
+def get_session():
+    with db_session as session:
+        yield session

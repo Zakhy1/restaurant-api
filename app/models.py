@@ -1,9 +1,10 @@
 from typing import List
 
+from fastapi import Depends
 from sqlalchemy import Float, Numeric, select, func, Engine
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
-from sqlalchemy.orm import DeclarativeBase, column_property
+from sqlalchemy.orm import DeclarativeBase, column_property, Session
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -17,9 +18,9 @@ class Dish(Base):
     __tablename__ = "dishes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(128), unique=True)
+    title: Mapped[str] = mapped_column(String(128))
     description: Mapped[str] = mapped_column(String(128))
-    price: Mapped[Numeric] = mapped_column(Float(4))
+    price: Mapped[Numeric] = mapped_column(Numeric(precision=10, scale=4))
 
     submenu_id: Mapped[int] = mapped_column(ForeignKey("submenus.id", ondelete="CASCADE"))
     submenu: Mapped["SubMenu"] = relationship(back_populates="dishes", cascade="all, delete-orphan", single_parent=True)
@@ -36,7 +37,7 @@ class SubMenu(Base):
     __tablename__ = "submenus"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(128), unique=True)
+    title: Mapped[str] = mapped_column(String(128))
     description: Mapped[str] = mapped_column(String(128))
 
     menu_id: Mapped[int] = mapped_column(ForeignKey("menus.id"))
@@ -63,7 +64,7 @@ class Menu(Base):
     __tablename__ = "menus"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(128), unique=True)
+    title: Mapped[str] = mapped_column(String(128))
     description: Mapped[str] = mapped_column(String(128))
 
     submenus: Mapped[List["SubMenu"]] = relationship(
@@ -85,8 +86,3 @@ class Menu(Base):
 
     def __str__(self):
         str(self)
-
-
-class CrudOperations:
-    def __init__(self, engine: Engine):
-        self.engine = engine
