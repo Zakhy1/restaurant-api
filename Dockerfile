@@ -2,7 +2,6 @@ FROM python:3.10-slim
 
 WORKDIR /app
 ENV PYTHONPATH=/app
-ENV SQLALCHEMY_DATABASE_URL="postgresql+asyncpg://ylab:no_secure_password@db/resto"
 
 COPY requirements.txt /app/
 
