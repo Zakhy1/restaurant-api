@@ -1,4 +1,5 @@
 import sys
+from typing import Sequence
 
 from fastapi import HTTPException
 from sqlalchemy import and_, delete
@@ -6,36 +7,35 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.databases import db_session
-from app.models import Dish
 from app.models import SubMenu
-from app.submenu.schemas import SubMenuSchema, SubMenuSchemaResponse
+from app.submenu.schemas import SubMenuSchema
 
 sys.setrecursionlimit(2000)
 
 
 class SubMenuRepository:
-    def __init__(self, session: Session = db_session):
+    def __init__(self, session: Session = db_session) -> None:
         self.session: Session = session
 
-    def get_all(self, menu_id: int):
+    def get_all(self, menu_id: int) -> Sequence[SubMenu]:
         query_result = self.session.execute(select(SubMenu).where(SubMenu.menu_id == menu_id))
         submenus = query_result.scalars().all()
         return submenus
 
-    def get_one(self, menu_id: int, submenu_id: int):
+    def get_one(self, menu_id: int, submenu_id: int) -> SubMenu | None:
         query = select(SubMenu).where(and_(SubMenu.id == submenu_id, SubMenu.menu_id == menu_id))
         query_result = self.session.execute(query)
         submenu = query_result.scalar_one_or_none()
         return submenu
 
-    def post(self, menu_id: int, submenu: SubMenuSchema):
+    def post(self, menu_id: int, submenu: SubMenuSchema) -> SubMenu:
         new_submenu = SubMenu(menu_id=menu_id, **submenu.model_dump())
         self.session.add(new_submenu)
         self.session.commit()
         self.session.refresh(new_submenu)
         return new_submenu
 
-    def patch(self, menu_id, submenu_id, submenu: SubMenuSchema):
+    def patch(self, menu_id: int, submenu_id: int, submenu: SubMenuSchema) -> SubMenu:
         query = select(SubMenu).where(and_(SubMenu.id == submenu_id, SubMenu.menu_id == menu_id))
         result = self.session.execute(query)
         to_edit = result.scalar_one_or_none()
@@ -48,7 +48,7 @@ class SubMenuRepository:
         else:
             raise HTTPException(status_code=404, detail="submenu not found")
 
-    def delete(self, menu_id: int, submenu_id: int):
+    def delete(self, menu_id: int, submenu_id: int) -> dict:
         query = delete(SubMenu).where(and_(SubMenu.id == submenu_id, SubMenu.menu_id == menu_id))
         self.session.execute(query)
         self.session.commit()

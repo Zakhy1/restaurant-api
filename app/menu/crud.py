@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
@@ -9,19 +11,19 @@ from app.models import Menu
 
 
 class MenuRepository:  # TODO Вынести в notify обработку после запросов
-    def __init__(self, session: Session = db_session):
+    def __init__(self, session: Session = db_session) -> None:
         self.session: Session = session
 
-    def get_all(self):
+    def get_all(self) -> Sequence[Menu]:
         menus = self.session.execute(select(Menu)).scalars().all()
         return menus
 
-    def get_one(self, menu_id: int):
+    def get_one(self, menu_id: int) -> Menu:
         query = select(Menu).where(Menu.id == menu_id)
         menu = self.session.execute(query).scalar_one_or_none()
         return menu
 
-    def post(self, menu: MenuSchema):
+    def post(self, menu: MenuSchema) -> Menu:
         new_menu = Menu(
             **menu.model_dump()
         )
@@ -30,7 +32,7 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
         self.session.refresh(new_menu)
         return new_menu
 
-    def patch(self, menu_id: int, menu: MenuSchema):
+    def patch(self, menu_id: int, menu: MenuSchema) -> Menu | None:
         to_edit = self.session.get(Menu, menu_id)
         if to_edit:
             to_edit.title = menu.title
@@ -41,7 +43,7 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
         else:
             raise HTTPException(status_code=404, detail="menu not found")
 
-    def delete(self, menu_id: int):
+    def delete(self, menu_id: int) -> dict:
         query = delete(Menu).where(Menu.id == menu_id)
         self.session.execute(query)
         self.session.commit()
