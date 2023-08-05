@@ -27,12 +27,6 @@ engine = create_engine(
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db_session = Session()
 
-
-def get_session():
-    with db_session as session:
-        yield session
-
-
 REDIS_HOST = os.environ.get("REDIS_HOST")
 
 
@@ -58,10 +52,10 @@ class RedisCache:
     def delete(self, key: Any) -> int:
         return self.client.delete(str(key))
 
-    def clear_cache(self, pattern: str):
+    def clear_cache(self, pattern: str) -> None:
         for key in self.client.scan_iter(pattern):
             self.client.delete(key)
 
-    def clear_after_change(self, menu_id: int | str):
+    def clear_after_change(self, menu_id: int | str) -> None:
         self.clear_cache(f'{menu_id}*')
         self.clear_cache('all*')
