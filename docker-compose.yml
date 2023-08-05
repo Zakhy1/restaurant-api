@@ -11,13 +11,13 @@ services:
     ports:
       - '5432:5432'
     environment:
-    - POSTGRES_USER=restaurant_manager
-    - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
-    - POSTGRES_DB=restaurant_api
+      - POSTGRES_USER=restaurant_manager
+      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
+      - POSTGRES_DB=restaurant_api
     networks:
       - mynetwork
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U restaurant_manager -d restaurant_api"]
+      test: [ "CMD-SHELL", "pg_isready -U restaurant_manager -d restaurant_api" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,11 +32,15 @@ services:
       db:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    environment:
-      - PYTHONPATH=/app
-      - POSTGRES_HOST=postgres-rest
-      - POSTGRES_USER=restaurant_manager
-      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
-      - POSTGRES_DB=restaurant_api
+    env_file:
+      - .env
+    networks:
+      - mynetwork
+
+  redis:
+    container_name: redis-cache
+    image: redis
+    ports:
+      - "6379:6379"
     networks:
       - mynetwork
