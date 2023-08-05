@@ -11,7 +11,7 @@ class SubMenuService:
         self.database_repository = database_repository
         self.redis_client = redis_client
 
-    def get_submenus(self, menu_id) -> list:
+    def get_submenus(self, menu_id: int) -> list[SubMenuSchemaResponse]:
         cached = self.redis_client.get(f'all:{menu_id}')
         if cached is not None:
             return cached
@@ -24,7 +24,7 @@ class SubMenuService:
         self.redis_client.set(f'all:{menu_id}', submenus_lst)
         return submenus_lst
 
-    def get_submenu(self, menu_id, submenu_id):
+    def get_submenu(self, menu_id: int, submenu_id: int) -> SubMenuSchemaResponse:
         cached = self.redis_client.get(f'{menu_id}:{submenu_id}')
         if cached is not None:
             return cached
@@ -38,7 +38,7 @@ class SubMenuService:
         else:
             raise HTTPException(status_code=404, detail="submenu not found")
 
-    def add_submenu(self, menu_id, submenu: SubMenuSchema):
+    def add_submenu(self, menu_id: int, submenu: SubMenuSchema) -> SubMenuSchemaResponse:
         new_submenu = self.database_repository.post(menu_id, submenu)
         to_return = new_submenu.__dict__
         to_return["id"] = str(to_return["id"])
@@ -47,7 +47,7 @@ class SubMenuService:
         self.redis_client.clear_after_change(menu_id)
         return response
 
-    def edit_submenu(self, menu_id, submenu_id, submenu: SubMenuSchema):
+    def edit_submenu(self, menu_id: int, submenu_id: int, submenu: SubMenuSchema) -> SubMenuSchemaResponse:
         to_edit = self.database_repository.patch(menu_id, submenu_id, submenu)
         to_return = to_edit.__dict__
         to_return["id"] = str(to_return["id"])
@@ -56,7 +56,7 @@ class SubMenuService:
         self.redis_client.clear_after_change(menu_id)
         return response
 
-    def delete_submenu(self, menu_id: int, submenu_id: int):
+    def delete_submenu(self, menu_id: int, submenu_id: int) -> dict:
         submenu = self.database_repository.delete(menu_id, submenu_id)
         self.redis_client.delete(f'{menu_id}:{submenu_id}')
         self.redis_client.clear_after_change(menu_id)

@@ -8,11 +8,11 @@ from app.menu.schemas import MenuSchema, MenuSchemaResponse
 
 class MenuService:
     def __init__(self, database_repository: MenuRepository = MenuRepository(),
-                 redis_client: RedisCache = RedisCache()):
+                 redis_client: RedisCache = RedisCache()) -> None:
         self.database_repository = database_repository
         self.redis_client = redis_client
 
-    def get_menus(self) -> list:
+    def get_menus(self) -> list[MenuSchemaResponse]:
         cached = self.redis_client.get('all')
         if cached is not None:
             return cached
@@ -25,7 +25,7 @@ class MenuService:
         self.redis_client.set('all', menus_lst)
         return menus_lst
 
-    def get_menu(self, menu_id):
+    def get_menu(self, menu_id: int) -> MenuSchemaResponse:
         cached = self.redis_client.get(f'{menu_id}')
         if cached is not None:
             return cached
@@ -48,7 +48,7 @@ class MenuService:
         self.redis_client.clear_cache('all*')
         return response
 
-    def edit_menu(self, menu_id, menu: MenuSchema):
+    def edit_menu(self, menu_id: int, menu: MenuSchema) -> MenuSchemaResponse:
         to_edit = self.database_repository.patch(menu_id, menu)
         menu_dict = to_edit.__dict__
         menu_dict["id"] = str(menu_dict["id"])
@@ -57,7 +57,7 @@ class MenuService:
         self.redis_client.clear_after_change(menu_id)
         return response
 
-    def delete_menu(self, menu_id):
+    def delete_menu(self, menu_id: int) -> dict:
         menu = self.database_repository.delete(menu_id)
         self.redis_client.delete(f'{menu_id}')
         self.redis_client.clear_after_change(menu_id)
