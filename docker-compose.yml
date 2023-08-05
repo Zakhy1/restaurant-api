@@ -10,10 +10,8 @@ services:
     restart: always
     ports:
       - '5432:5432'
-    environment:
-      - POSTGRES_USER=restaurant_manager
-      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
-      - POSTGRES_DB=restaurant_api
+    env_file:
+      - .env
     networks:
       - mynetwork
     healthcheck:
