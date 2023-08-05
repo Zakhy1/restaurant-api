@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
-from app.database import db_session
+from app.databases import db_session
 
 from app.menu.schemas import MenuSchema
 from app.models import Menu

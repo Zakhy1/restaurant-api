@@ -3,7 +3,7 @@ from sqlalchemy import and_, delete
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.database import db_session
+from app.databases import db_session
 from app.dishes.schemas import DishSchemaResponse, DishSchema
 from app.models import Dish
 from app.models import SubMenu

@@ -1,4 +1,4 @@
-from database import engine
+from databases import engine
 from models import Base
 
 if __name__ == "__main__":
