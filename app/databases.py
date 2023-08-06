@@ -37,7 +37,7 @@ def get_redis_client():
 class RedisCache:
     def __init__(self, redis_client: redis.Redis = get_redis_client()) -> None:
         self.client = redis_client
-        self.time_to_live = 1800
+        self.time_to_live = 300
 
     def get_cache(self, key: Any) -> Any | None:
         data = self.client.get(str(key))
