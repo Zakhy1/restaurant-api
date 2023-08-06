@@ -52,8 +52,8 @@ class RedisCache:
     def delete_cache(self, key: Any) -> int:
         return self.client.delete(str(key))
 
-    def clear_cache(self, pattern: str) -> None:
-        for key in self.client.scan_iter(pattern):
+    def clear_cache(self, address: str) -> None:
+        for key in self.client.scan_iter(address):
             self.client.delete(key)
 
     def clear_all_cache(self, menu_id: int | str) -> None:
