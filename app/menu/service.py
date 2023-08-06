@@ -12,7 +12,7 @@ class MenuService:
         self.redis_client = redis_client
 
     def get_menus(self) -> list[MenuSchemaResponse]:
-        cached = self.redis_client.get('all')
+        cached = self.redis_client.get_cache('all')
         if cached is not None:
             return cached
         menus = self.database_repository.get_all()
@@ -21,11 +21,11 @@ class MenuService:
             response = MenuSchemaResponse(**item.__dict__)
             response.id = str(response.id)
             menus_lst.append(response)
-        self.redis_client.set('all', menus_lst)
+        self.redis_client.set_cache('all', menus_lst)
         return menus_lst
 
     def get_menu(self, menu_id: int) -> MenuSchemaResponse:
-        cached = self.redis_client.get(f'{menu_id}')
+        cached = self.redis_client.get_cache(f'{menu_id}')
         if cached is not None:
             return cached
         menu = self.database_repository.get_one(menu_id)
@@ -33,7 +33,7 @@ class MenuService:
             menu_dict = menu.__dict__
             menu_dict['id'] = str(menu_dict['id'])
             response = MenuSchemaResponse(**menu_dict)
-            self.redis_client.set(f'{menu_id}', response)
+            self.redis_client.set_cache(f'{menu_id}', response)
             return response
         else:
             raise HTTPException(status_code=404, detail='menu not found')
@@ -43,7 +43,7 @@ class MenuService:
         menu_dict = new_menu.__dict__
         menu_dict['id'] = str(menu_dict['id'])
         response = MenuSchemaResponse(**menu_dict)
-        self.redis_client.set(new_menu.id, response)
+        self.redis_client.set_cache(new_menu.id, response)
         self.redis_client.clear_cache('all*')
         return response
 
@@ -52,12 +52,12 @@ class MenuService:
         menu_dict = to_edit.__dict__
         menu_dict['id'] = str(menu_dict['id'])
         response = MenuSchemaResponse(**menu_dict)
-        self.redis_client.set(f'{menu_id}', response)
-        self.redis_client.clear_after_change(menu_id)
+        self.redis_client.set_cache(f'{menu_id}', response)
+        self.redis_client.clear_all_cache(menu_id)
         return response
 
     def delete_menu(self, menu_id: int) -> dict:
         menu = self.database_repository.delete(menu_id)
-        self.redis_client.delete(f'{menu_id}')
-        self.redis_client.clear_after_change(menu_id)
+        self.redis_client.delete_cache(f'{menu_id}')
+        self.redis_client.clear_all_cache(menu_id)
         return menu

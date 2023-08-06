@@ -39,23 +39,23 @@ class RedisCache:
         self.client = redis_client
         self.time_to_live = 1800
 
-    def get(self, key: Any) -> Any | None:
+    def get_cache(self, key: Any) -> Any | None:
         data = self.client.get(str(key))
         if data is not None:
             return pickle.loads(data)
         return None
 
-    def set(self, key: Any, value: Any) -> bool:
+    def set_cache(self, key: Any, value: Any) -> bool:
         data = pickle.dumps(value)
         return self.client.setex(str(key), self.time_to_live, data)
 
-    def delete(self, key: Any) -> int:
+    def delete_cache(self, key: Any) -> int:
         return self.client.delete(str(key))
 
     def clear_cache(self, pattern: str) -> None:
         for key in self.client.scan_iter(pattern):
             self.client.delete(key)
 
-    def clear_after_change(self, menu_id: int | str) -> None:
+    def clear_all_cache(self, menu_id: int | str) -> None:
         self.clear_cache(f'{menu_id}*')
         self.clear_cache('all*')

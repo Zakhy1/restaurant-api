@@ -12,7 +12,7 @@ class DishService:
         self.redis_client = redis_client
 
     def get_dishes(self, menu_id: int, submenu_id: int) -> list[DishSchemaResponse]:
-        cached = self.redis_client.get(f'all:{menu_id}:{submenu_id}')
+        cached = self.redis_client.get_cache(f'all:{menu_id}:{submenu_id}')
         if cached is not None:
             return cached
         dishes = self.database_repository.get_all(menu_id, submenu_id)
@@ -22,11 +22,11 @@ class DishService:
             dish_dict['id'] = str(dish_dict['id'])
             dish_dict['price'] = str(round(dish_dict['price'], 2))
             dishes_list.append(DishSchemaResponse(**dish_dict))
-        self.redis_client.set(f'all:{menu_id}:{submenu_id}', dishes_list)
+        self.redis_client.set_cache(f'all:{menu_id}:{submenu_id}', dishes_list)
         return dishes_list
 
     def get_dish(self, menu_id: int, submenu_id: int, dish_id: int) -> DishSchemaResponse:
-        cached = self.redis_client.get(f'{menu_id}:{submenu_id}:{dish_id}')
+        cached = self.redis_client.get_cache(f'{menu_id}:{submenu_id}:{dish_id}')
         if cached is not None:
             return cached
         dish = self.database_repository.get_one(menu_id, submenu_id, dish_id)
@@ -35,7 +35,7 @@ class DishService:
             dish_dict['id'] = str(dish_dict['id'])
             dish_dict['price'] = str(round(dish_dict['price'], 2))
             response = DishSchemaResponse(**dish_dict)
-            self.redis_client.set(f'{menu_id}:{submenu_id}:{dish_id}', response)
+            self.redis_client.set_cache(f'{menu_id}:{submenu_id}:{dish_id}', response)
             return response
         else:
             raise HTTPException(status_code=404, detail='dish not found')
@@ -46,8 +46,8 @@ class DishService:
         to_return['id'] = str(to_return['id'])
         to_return['price'] = str(round(to_return['price'], 2))
         response = DishSchemaResponse(**to_return)
-        self.redis_client.set(f'{menu_id}:{submenu_id}:{response.id}', response)
-        self.redis_client.clear_after_change(menu_id)
+        self.redis_client.set_cache(f'{menu_id}:{submenu_id}:{response.id}', response)
+        self.redis_client.clear_all_cache(menu_id)
         return response
 
     def edit_dish(self, menu_id: int, submenu_id: int, dish_id: int, dish: DishSchema) -> DishSchemaResponse:
@@ -56,12 +56,12 @@ class DishService:
         to_return['id'] = str(to_return['id'])
         to_return['price'] = str(round(to_return['price'], 2))
         response = DishSchemaResponse(**to_return)
-        self.redis_client.set(f'{menu_id}:{submenu_id}:{dish_id}', response)
-        self.redis_client.clear_after_change(menu_id)
+        self.redis_client.set_cache(f'{menu_id}:{submenu_id}:{dish_id}', response)
+        self.redis_client.clear_all_cache(menu_id)
         return response
 
     def delete_dish(self, menu_id: int, submenu_id: int, dish_id: int) -> dict:
         dish = self.database_repository.delete(menu_id, submenu_id, dish_id)
-        self.redis_client.delete(f'{menu_id}:{submenu_id}:{dish_id}')
-        self.redis_client.clear_after_change(menu_id)
+        self.redis_client.delete_cache(f'{menu_id}:{submenu_id}:{dish_id}')
+        self.redis_client.clear_all_cache(menu_id)
         return dish
