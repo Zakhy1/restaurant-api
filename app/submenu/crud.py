@@ -2,8 +2,7 @@ import sys
 from typing import Sequence
 
 from fastapi import HTTPException
-from sqlalchemy import and_, delete
-from sqlalchemy import select
+from sqlalchemy import and_, delete, select
 from sqlalchemy.orm import Session
 
 from app.databases import db_session
@@ -46,10 +45,10 @@ class SubMenuRepository:
             self.session.refresh(to_edit)
             return to_edit
         else:
-            raise HTTPException(status_code=404, detail="submenu not found")
+            raise HTTPException(status_code=404, detail='submenu not found')
 
     def delete(self, menu_id: int, submenu_id: int) -> dict:
         query = delete(SubMenu).where(and_(SubMenu.id == submenu_id, SubMenu.menu_id == menu_id))
         self.session.execute(query)
         self.session.commit()
-        return {"status": True, "message": "The submenu has been deleted"}
+        return {'status': True, 'message': 'The submenu has been deleted'}

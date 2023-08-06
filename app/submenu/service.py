@@ -31,17 +31,17 @@ class SubMenuService:
         submenu = self.database_repository.get_one(menu_id, submenu_id)
         if submenu:
             submenu_dict = submenu.__dict__
-            submenu_dict["id"] = str(submenu_dict["id"])
+            submenu_dict['id'] = str(submenu_dict['id'])
             response = SubMenuSchemaResponse(**submenu_dict)
             self.redis_client.set(f'{menu_id}:{submenu_id}', response)
             return response
         else:
-            raise HTTPException(status_code=404, detail="submenu not found")
+            raise HTTPException(status_code=404, detail='submenu not found')
 
     def add_submenu(self, menu_id: int, submenu: SubMenuSchema) -> SubMenuSchemaResponse:
         new_submenu = self.database_repository.post(menu_id, submenu)
         to_return = new_submenu.__dict__
-        to_return["id"] = str(to_return["id"])
+        to_return['id'] = str(to_return['id'])
         response = SubMenuSchemaResponse(**to_return)
         self.redis_client.set(f'{menu_id}:{response.id})', response)
         self.redis_client.clear_after_change(menu_id)
@@ -50,7 +50,7 @@ class SubMenuService:
     def edit_submenu(self, menu_id: int, submenu_id: int, submenu: SubMenuSchema) -> SubMenuSchemaResponse:
         to_edit = self.database_repository.patch(menu_id, submenu_id, submenu)
         to_return = to_edit.__dict__
-        to_return["id"] = str(to_return["id"])
+        to_return['id'] = str(to_return['id'])
         response = SubMenuSchemaResponse(**to_return)
         self.redis_client.set(f'{menu_id}:{submenu_id}', response)
         self.redis_client.clear_after_change(menu_id)

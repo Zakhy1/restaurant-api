@@ -41,7 +41,7 @@ services:
     networks:
       - test-network
     command: >
-      bash -c "python create_tables.py 
+      bash -c "python create_tables.py
       && pytest app/tests/menu_test.py app/tests/submenu_test.py app/tests/dish_test.py"
     depends_on:
       db:

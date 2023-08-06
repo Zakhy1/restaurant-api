@@ -23,4 +23,3 @@ CREATE TABLE dishes (
         PRIMARY KEY (id),
         FOREIGN KEY(submenu_id) REFERENCES submenus (id) ON DELETE CASCADE
 );
-

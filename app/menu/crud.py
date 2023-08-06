@@ -1,11 +1,10 @@
 from typing import Sequence
 
 from fastapi import HTTPException
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.databases import db_session
-
 from app.menu.schemas import MenuSchema
 from app.models import Menu
 
@@ -41,10 +40,10 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
             self.session.refresh(to_edit)
             return to_edit
         else:
-            raise HTTPException(status_code=404, detail="menu not found")
+            raise HTTPException(status_code=404, detail='menu not found')
 
     def delete(self, menu_id: int) -> dict:
         query = delete(Menu).where(Menu.id == menu_id)
         self.session.execute(query)
         self.session.commit()
-        return {"status": True, "message": "The menu has been deleted"}
+        return {'status': True, 'message': 'The menu has been deleted'}

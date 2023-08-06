@@ -1,7 +1,6 @@
-import redis
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 
-from app.databases import RedisCache, get_redis_client
+from app.databases import RedisCache
 from app.menu.crud import MenuRepository
 from app.menu.schemas import MenuSchema, MenuSchemaResponse
 
@@ -32,17 +31,17 @@ class MenuService:
         menu = self.database_repository.get_one(menu_id)
         if menu:
             menu_dict = menu.__dict__
-            menu_dict["id"] = str(menu_dict["id"])
+            menu_dict['id'] = str(menu_dict['id'])
             response = MenuSchemaResponse(**menu_dict)
             self.redis_client.set(f'{menu_id}', response)
             return response
         else:
-            raise HTTPException(status_code=404, detail="menu not found")
+            raise HTTPException(status_code=404, detail='menu not found')
 
     def add_menu(self, menu: MenuSchema):
         new_menu = self.database_repository.post(menu)
         menu_dict = new_menu.__dict__
-        menu_dict["id"] = str(menu_dict["id"])
+        menu_dict['id'] = str(menu_dict['id'])
         response = MenuSchemaResponse(**menu_dict)
         self.redis_client.set(new_menu.id, response)
         self.redis_client.clear_cache('all*')
@@ -51,7 +50,7 @@ class MenuService:
     def edit_menu(self, menu_id: int, menu: MenuSchema) -> MenuSchemaResponse:
         to_edit = self.database_repository.patch(menu_id, menu)
         menu_dict = to_edit.__dict__
-        menu_dict["id"] = str(menu_dict["id"])
+        menu_dict['id'] = str(menu_dict['id'])
         response = MenuSchemaResponse(**menu_dict)
         self.redis_client.set(f'{menu_id}', response)
         self.redis_client.clear_after_change(menu_id)

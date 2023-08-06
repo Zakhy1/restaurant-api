@@ -1,14 +1,12 @@
 from typing import Sequence
 
 from fastapi import HTTPException
-from sqlalchemy import and_, delete
-from sqlalchemy import select
+from sqlalchemy import and_, delete, select
 from sqlalchemy.orm import Session
 
 from app.databases import db_session
 from app.dishes.schemas import DishSchema
-from app.models import Dish
-from app.models import SubMenu
+from app.models import Dish, SubMenu
 
 
 class DishRepository:
@@ -48,10 +46,10 @@ class DishRepository:
             self.session.refresh(to_edit)
             return to_edit
         else:
-            raise HTTPException(status_code=404, detail="dish not found")
+            raise HTTPException(status_code=404, detail='dish not found')
 
     def delete(self, menu_id: int, submenu_id: int, dish_id: int) -> dict:
         query = delete(Dish).where(Dish.id == dish_id)
         self.session.execute(query)
         self.session.commit()
-        return {"status": True, "message": "The dish has been deleted"}
+        return {'status': True, 'message': 'The dish has been deleted'}
