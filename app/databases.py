@@ -16,8 +16,9 @@ DB_USER = os.environ.get('POSTGRES_USER')
 DB_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
 DB_NAME = os.environ.get('POSTGRES_DB')
 DB_HOST = os.environ.get('POSTGRES_HOST')
+DB_PORT = os.environ.get('POSTGRES_PORT')
 # Подключение к БД
-SQLALCHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}'
+SQLALCHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 engine = create_engine(
     url=SQLALCHEMY_DATABASE_URL,
@@ -27,10 +28,11 @@ Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 db_session = Session()
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = os.environ.get('REDIS_PORT')
 
 
 def get_redis_client():
-    return redis.Redis(host=f'{REDIS_HOST}', port=6379, db=0)
+    return redis.Redis(host=f'{REDIS_HOST}', port=REDIS_PORT, db=0)
 
 
 class RedisCache:
