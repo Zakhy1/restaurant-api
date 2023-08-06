@@ -3,17 +3,15 @@ networks:
   test-network:
 services:
   db:
-    container_name: postgres-rest
+    container_name: postgres-rest-test
     build:
       context: .
       dockerfile: Dockefile-db
     restart: always
     ports:
       - '5432:5432'
-    environment:
-      - POSTGRES_USER=restaurant_manager
-      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
-      - POSTGRES_DB=restaurant_api
+    env_file:
+      - .env_test
     networks:
       - test-network
     healthcheck:
@@ -31,11 +29,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
-      - POSTGRES_HOST=postgres-rest
-      - POSTGRES_USER=restaurant_manager
-      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
-      - POSTGRES_DB=restaurant_api
+    env_file:
+      - .env_test
     networks:
       - test-network
 
@@ -47,14 +42,19 @@ services:
       - test-network
     command: >
       bash -c "python create_tables.py 
-      && pytest tests/menu_test.py tests/submenu_test.py tests/dish_test.py"
+      && pytest app/tests/menu_test.py app/tests/submenu_test.py app/tests/dish_test.py"
     depends_on:
       db:
         condition: service_healthy
       app:
         condition: service_started
-    environment:
-      - POSTGRES_USER=restaurant_manager
-      - POSTGRES_PASSWORD=b24de59f8c8fe841be3b
-      - POSTGRES_DB=restaurant_api
-      - POSTGRES_HOST=postgres-rest
+    env_file:
+      - .env_test
+
+  redis:
+    container_name: redis-test
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - test-network

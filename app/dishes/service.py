@@ -18,10 +18,10 @@ class DishService:
         dishes = self.database_repository.get_all(menu_id, submenu_id)
         dishes_list = []
         for dish in dishes:
-            dish_response = DishSchemaResponse(**dish.__dict__)
-            dish_response.id = str(dish_response.id)
-            dish_response.price = str(round(dish_response.price, 2))
-            dishes_list.append(dish_response)
+            dish_dict = dish.__dict__
+            dish_dict["id"] = str(dish_dict["id"])
+            dish_dict["price"] = str(round(dish_dict["price"], 2))
+            dishes_list.append(DishSchemaResponse(**dish_dict))
         self.redis_client.set(f'all:{menu_id}:{submenu_id}', dishes_list)
         return dishes_list
 
