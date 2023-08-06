@@ -6,7 +6,7 @@ services:
     container_name: postgres-rest
     build:
       context: .
-      dockerfile: Dockefile-db
+      dockerfile: Dockerfile-db
     restart: always
     ports:
       - '5432:5432'

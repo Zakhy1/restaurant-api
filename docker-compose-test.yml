@@ -6,7 +6,7 @@ services:
     container_name: postgres-rest-test
     build:
       context: .
-      dockerfile: Dockefile-db
+      dockerfile: Dockerfile-db-test
     restart: always
     ports:
       - '5432:5432'
@@ -15,7 +15,7 @@ services:
     networks:
       - test-network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U restaurant_manager -d restaurant_api" ]
+      test: [ "CMD-SHELL", "pg_isready -U restaurant_manager-test -d restaurant_api-test" ]
       interval: 10s
       timeout: 5s
       retries: 5
