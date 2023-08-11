@@ -15,7 +15,7 @@ class MenuService:
         cached = self.redis_client.get_cache('all')
         if cached is not None:
             return cached
-        menus = self.database_repository.get_all()
+        menus = await self.database_repository.get_all()
         menus_lst = []
         for item in menus:
             response = MenuSchemaResponse(**item.__dict__)
@@ -28,7 +28,7 @@ class MenuService:
         cached = self.redis_client.get_cache(f'{menu_id}')
         if cached is not None:
             return cached
-        menu = self.database_repository.get_one(menu_id)
+        menu = await self.database_repository.get_one(menu_id)
         if menu:
             menu_dict = menu.__dict__
             menu_dict['id'] = str(menu_dict['id'])
@@ -39,7 +39,7 @@ class MenuService:
             raise HTTPException(status_code=404, detail='menu not found')
 
     async def add_menu(self, menu: MenuSchema):
-        new_menu = self.database_repository.post(menu)
+        new_menu = await self.database_repository.post(menu)
         menu_dict = new_menu.__dict__
         menu_dict['id'] = str(menu_dict['id'])
         response = MenuSchemaResponse(**menu_dict)
@@ -48,7 +48,7 @@ class MenuService:
         return response
 
     async def edit_menu(self, menu_id: int, menu: MenuSchema) -> MenuSchemaResponse:
-        to_edit = self.database_repository.patch(menu_id, menu)
+        to_edit = await self.database_repository.patch(menu_id, menu)
         menu_dict = to_edit.__dict__
         menu_dict['id'] = str(menu_dict['id'])
         response = MenuSchemaResponse(**menu_dict)
@@ -57,7 +57,7 @@ class MenuService:
         return response
 
     async def delete_menu(self, menu_id: int) -> dict:
-        menu = self.database_repository.delete(menu_id)
+        menu = await self.database_repository.delete(menu_id)
         self.redis_client.delete_cache(f'{menu_id}')
         self.redis_client.clear_all_cache(menu_id)
         return menu
