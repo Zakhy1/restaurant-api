@@ -11,7 +11,7 @@ class DishService:
         self.database_repository = database_repository
         self.redis_client = redis_client
 
-    def get_dishes(self, menu_id: int, submenu_id: int) -> list[DishSchemaResponse]:
+    async def get_dishes(self, menu_id: int, submenu_id: int) -> list[DishSchemaResponse]:
         cached = self.redis_client.get_cache(f'all:{menu_id}:{submenu_id}')
         if cached is not None:
             return cached
@@ -25,7 +25,7 @@ class DishService:
         self.redis_client.set_cache(f'all:{menu_id}:{submenu_id}', dishes_list)
         return dishes_list
 
-    def get_dish(self, menu_id: int, submenu_id: int, dish_id: int) -> DishSchemaResponse:
+    async def get_dish(self, menu_id: int, submenu_id: int, dish_id: int) -> DishSchemaResponse:
         cached = self.redis_client.get_cache(f'{menu_id}:{submenu_id}:{dish_id}')
         if cached is not None:
             return cached
@@ -40,7 +40,7 @@ class DishService:
         else:
             raise HTTPException(status_code=404, detail='dish not found')
 
-    def add_dish(self, menu_id: int, submenu_id: int, dish: DishSchema) -> DishSchemaResponse:
+    async def add_dish(self, menu_id: int, submenu_id: int, dish: DishSchema) -> DishSchemaResponse:
         new_dish = self.database_repository.post(menu_id, submenu_id, dish)
         to_return = new_dish.__dict__
         to_return['id'] = str(to_return['id'])
@@ -50,7 +50,7 @@ class DishService:
         self.redis_client.clear_all_cache(menu_id)
         return response
 
-    def edit_dish(self, menu_id: int, submenu_id: int, dish_id: int, dish: DishSchema) -> DishSchemaResponse:
+    async def edit_dish(self, menu_id: int, submenu_id: int, dish_id: int, dish: DishSchema) -> DishSchemaResponse:
         to_edit = self.database_repository.patch(menu_id, submenu_id, dish_id, dish)
         to_return = to_edit.__dict__
         to_return['id'] = str(to_return['id'])
@@ -60,7 +60,7 @@ class DishService:
         self.redis_client.clear_all_cache(menu_id)
         return response
 
-    def delete_dish(self, menu_id: int, submenu_id: int, dish_id: int) -> dict:
+    async def delete_dish(self, menu_id: int, submenu_id: int, dish_id: int) -> dict:
         dish = self.database_repository.delete(menu_id, submenu_id, dish_id)
         self.redis_client.delete_cache(f'{menu_id}:{submenu_id}:{dish_id}')
         self.redis_client.clear_all_cache(menu_id)
