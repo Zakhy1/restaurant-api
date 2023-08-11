@@ -4,7 +4,7 @@ from typing import Any
 
 import redis  # type: ignore
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 # Получение данных для подключения к БД
@@ -18,14 +18,23 @@ DB_NAME = os.environ.get('POSTGRES_DB')
 DB_HOST = os.environ.get('POSTGRES_HOST')
 DB_PORT = os.environ.get('POSTGRES_PORT')
 # Подключение к БД
-SQLALCHEMY_DATABASE_URL = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
-engine = create_engine(
+engine = create_async_engine(
     url=SQLALCHEMY_DATABASE_URL,
 )
 
-Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-db_session = Session()
+async_session = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
+
+db_session = None
+
+
+async def get_session() -> AsyncSession:
+    async with async_session() as session:
+        yield session
+
 
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')

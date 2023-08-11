@@ -6,9 +6,9 @@ from app.dishes.schemas import DishSchema, DishSchemaResponse
 
 
 class DishService:
-    def __init__(self, database_repository: DishRepository = DishRepository(),
+    def __init__(self, session,
                  redis_client: RedisCache = RedisCache()) -> None:
-        self.database_repository = database_repository
+        self.database_repository = DishRepository(session)
         self.redis_client = redis_client
 
     async def get_dishes(self, menu_id: int, submenu_id: int) -> list[DishSchemaResponse]:

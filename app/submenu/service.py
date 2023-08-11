@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.databases import RedisCache
 from app.submenu.crud import SubMenuRepository
@@ -6,9 +7,9 @@ from app.submenu.schemas import SubMenuSchema, SubMenuSchemaResponse
 
 
 class SubMenuService:
-    def __init__(self, database_repository: SubMenuRepository = SubMenuRepository(),
+    def __init__(self, session: AsyncSession,
                  redis_client: RedisCache = RedisCache()):
-        self.database_repository = database_repository
+        self.database_repository = SubMenuRepository(session)
         self.redis_client = redis_client
 
     async def get_submenus(self, menu_id: int) -> list[SubMenuSchemaResponse]:

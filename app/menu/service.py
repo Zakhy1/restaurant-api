@@ -6,9 +6,9 @@ from app.menu.schemas import MenuSchema, MenuSchemaResponse
 
 
 class MenuService:
-    def __init__(self, database_repository: MenuRepository = MenuRepository(),
+    def __init__(self, session,
                  redis_client: RedisCache = RedisCache()) -> None:
-        self.database_repository = database_repository
+        self.database_repository = MenuRepository(session)
         self.redis_client = redis_client
 
     async def get_menus(self) -> list[MenuSchemaResponse]:
