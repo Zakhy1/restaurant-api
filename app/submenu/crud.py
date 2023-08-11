@@ -5,7 +5,6 @@ from fastapi import HTTPException
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.databases import db_session
 from app.models import SubMenu
 from app.submenu.schemas import SubMenuSchema
 
@@ -13,7 +12,7 @@ sys.setrecursionlimit(2000)
 
 
 class SubMenuRepository:
-    def __init__(self, session: AsyncSession = db_session) -> None:
+    def __init__(self, session: AsyncSession) -> None:
         self.session: AsyncSession = session
 
     async def get_all(self, menu_id: int) -> Sequence[SubMenu]:
