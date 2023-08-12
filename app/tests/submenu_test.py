@@ -1,16 +1,12 @@
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
+from httpx import AsyncClient
 
 menu_id = 2
 submenu_id = 1
 
 
-def test_add_menu():
+async def test_add_menu(ac: AsyncClient):
     new_menu = {'title': 'My menu 1', 'description': 'My menu description 1'}
-    response = client.post('/api/v1/menus', json=new_menu)
+    response = await ac.post('/api/v1/menus', json=new_menu)
     assert response.status_code == 201
     assert response.json() == {
         'title': 'My menu 1',
@@ -21,9 +17,9 @@ def test_add_menu():
     }
 
 
-def test_add_submenu():
+async def test_add_submenu(ac: AsyncClient):
     new_submenu = {'title': 'My submenu 1', 'description': 'My submenu description 1'}
-    response = client.post(f'/api/v1/menus/{menu_id}/submenus', json=new_submenu)
+    response = await ac.post(f'/api/v1/menus/{menu_id}/submenus', json=new_submenu)
     assert response.status_code == 201
     assert response.json() == {
         'title': 'My submenu 1',
@@ -33,8 +29,8 @@ def test_add_submenu():
     }
 
 
-def test_get_submenus():
-    response = client.get(f'/api/v1/menus/{menu_id}/submenus')
+async def test_get_submenus(ac: AsyncClient):
+    response = await ac.get(f'/api/v1/menus/{menu_id}/submenus')
     assert response.status_code == 200
     assert response.json() == [
         {
@@ -46,8 +42,8 @@ def test_get_submenus():
     ]
 
 
-def test_get_submenu():
-    response = client.get(f'/api/v1/menus/{menu_id}/submenus/{submenu_id}')
+async def test_get_submenu(ac: AsyncClient):
+    response = await ac.get(f'/api/v1/menus/{menu_id}/submenus/{submenu_id}')
     assert response.status_code == 200
     assert response.json() == {
         'title': 'My submenu 1',
@@ -57,9 +53,9 @@ def test_get_submenu():
     }
 
 
-def test_edit_submenu():
+async def test_edit_submenu(ac: AsyncClient):
     new_data = {'title': 'My updated submenu 1', 'description': 'My updated submenu description 1'}
-    response = client.patch(f'/api/v1/menus/{menu_id}/submenus/{submenu_id}', json=new_data)
+    response = await ac.patch(f'/api/v1/menus/{menu_id}/submenus/{submenu_id}', json=new_data)
     assert response.status_code == 200
     assert response.json() == {
         'title': 'My updated submenu 1',
@@ -69,8 +65,8 @@ def test_edit_submenu():
     }
 
 
-def test_delete_submenu():
-    response = client.delete(f'/api/v1/menus/{menu_id}/submenus/{submenu_id}')
+async def test_delete_submenu(ac: AsyncClient):
+    response = await ac.delete(f'/api/v1/menus/{menu_id}/submenus/{submenu_id}')
     assert response.status_code == 200
     assert response.json() == {
         'status': True,
