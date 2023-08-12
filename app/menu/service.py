@@ -63,10 +63,10 @@ class MenuService:
         return menu
 
     async def get_all_items(self) -> FullMenuListResponse:
-        # cached = self.redis_client.get_cache('full_menus')
-        # if cached is not None:
-        #     return cached
+        cached = self.redis_client.get_cache('full_menus')
+        if cached is not None:
+            return cached
         items = await self.database_repository.get_all_entity()
         response = FullMenuListResponse(menus=items)
-        # self.redis_client.set_cache('full_menus', response)
+        self.redis_client.set_cache('full_menus', response)
         return response
