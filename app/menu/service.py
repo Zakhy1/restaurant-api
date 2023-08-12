@@ -2,7 +2,7 @@ from fastapi import HTTPException
 
 from app.databases import RedisCache
 from app.menu.crud import MenuRepository
-from app.menu.schemas import MenuSchema, MenuSchemaResponse
+from app.menu.schemas import FullMenuListResponse, MenuSchema, MenuSchemaResponse
 
 
 class MenuService:
@@ -61,3 +61,12 @@ class MenuService:
         self.redis_client.delete_cache(f'{menu_id}')
         self.redis_client.clear_all_cache(menu_id)
         return menu
+
+    async def get_all_items(self) -> FullMenuListResponse:
+        # cached = self.redis_client.get_cache('full_menus')
+        # if cached is not None:
+        #     return cached
+        items = await self.database_repository.get_all_entity()
+        response = FullMenuListResponse(menus=items)
+        # self.redis_client.set_cache('full_menus', response)
+        return response

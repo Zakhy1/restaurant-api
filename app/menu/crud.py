@@ -3,9 +3,10 @@ from typing import Sequence
 from fastapi import HTTPException
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.menu.schemas import MenuSchema
-from app.models import Menu
+from app.models import Menu, SubMenu
 
 
 class MenuRepository:  # TODO Вынести в notify обработку после запросов
@@ -47,3 +48,27 @@ class MenuRepository:  # TODO Вынести в notify обработку пос
         await self.session.execute(query)
         await self.session.commit()
         return {'status': True, 'message': 'The menu has been deleted'}
+
+    async def get_all_entity(self) -> list:
+        result = await self.session.execute(
+            select(Menu).options(selectinload(Menu.submenus).selectinload(SubMenu.dishes)))
+        menus = result.scalars().all()
+
+        menus_list = []
+        for menu_item in menus:
+            menu_data = {
+                'id': str(menu_item.id), 'title': menu_item.title, 'description': menu_item.description,
+                'submenus': [
+                    {
+                        'id': str(submenu_item.id), 'title': submenu_item.title, 'description': submenu_item.description,
+                        'dishes': [
+                            {
+                                'id': str(dish_item.id), 'title': dish_item.title, 'description': dish_item.description,
+                                'price': str(dish_item.price)
+                            } for dish_item in submenu_item.dishes
+                        ]
+                    } for submenu_item in menu_item.submenus
+                ]
+            }
+            menus_list.append(menu_data)
+        return menus_list
