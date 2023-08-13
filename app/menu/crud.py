@@ -9,7 +9,7 @@ from app.menu.schemas import MenuSchema
 from app.models import Menu, SubMenu
 
 
-class MenuRepository:  # TODO Вынести в notify обработку после запросов
+class MenuRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session: AsyncSession = session
 
