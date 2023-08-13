@@ -20,20 +20,20 @@ services:
       timeout: 5s
       retries: 5
 
-#  app:
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    ports:
-#      - '8000:8000'
-#    depends_on:
-#      db:
-#        condition: service_healthy
-#    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-#    env_file:
-#      - .env
-#    networks:
-#      - mynetwork
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env
+    networks:
+      - mynetwork
 
   redis:
     container_name: redis-cache
