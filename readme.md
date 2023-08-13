@@ -16,7 +16,8 @@
 * ##### Контейнеризация и оркестрация
   * Docker
 #### Запуск приложения
-docker-compose up
+При клонировании репозитория будет необходимо создать свой файл .env согласно примеру _example.env_
+`docker-compose up`
 
 #### Запуск приложения + тестов
-docker-compose -f docker-compose-test.yml up
+`docker-compose -f docker-compose-test.yml up`
